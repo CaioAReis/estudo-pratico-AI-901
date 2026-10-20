@@ -1,0 +1,900 @@
+/* =========================================================================
+   AI-901 · Simulado — visual inspirado no Quizlet.
+   Sem frameworks, sem CDN. Tudo em CSS custom properties.
+   ========================================================================= */
+
+:root {
+  --roxo: #4c3fd6;
+  --roxo-escuro: #3b30ad;
+  --roxo-claro: #efedfd;
+  --verde: #0f9d58;
+  --verde-fundo: #e6f4ec;
+  --verde-borda: #0f9d58;
+  --vermelho: #d93025;
+  --vermelho-fundo: #fdeceb;
+  --vermelho-borda: #d93025;
+  --ambar: #d99400;
+  --ambar-texto: #b06000;
+  --ambar-borda: #e4c68a;
+
+  --fundo: #f7f7fb;
+  --superficie: #ffffff;
+  --superficie-alt: #fbfbfe;
+  --borda: #e4e4ef;
+  --borda-forte: #cfcfdf;
+  --texto: #16161d;
+  --texto-suave: #6a6a7d;
+  --texto-tenue: #8e8ea3;
+
+  /* Fundo translúcido do topo e da barra de ação, sobre a superfície. */
+  --topo-fundo: rgba(255,255,255,.9);
+
+  /* Texto sobre fundos de acento (botão primário, marcador, estado correto). */
+  --sobre-acento: #ffffff;
+
+  /* Misturas para o hover e a seleção de cada modo na tela inicial. */
+  --hover-teste: #fbfaff;
+  --hover-estudo: #f8fdfa;
+  --hover-rapido: #fffdf6;
+
+  /* Tons de acento mais escuros, usados como fundo em hover de botão. */
+  --verde-forte: #0c7f48;
+  --vermelho-forte: #b5261c;
+
+  /* Contorno de foco por teclado. */
+  --foco: rgba(76,63,214,.42);
+
+  /* Bloco de código dos enunciados. */
+  --codigo-fundo: #1b1b25;
+  --codigo-texto: #e8e8f2;
+
+  color-scheme: light;
+
+  --raio: 14px;
+  --raio-p: 10px;
+  --sombra: 0 1px 2px rgba(22,22,29,.05), 0 4px 16px rgba(22,22,29,.06);
+  --sombra-alta: 0 8px 32px rgba(22,22,29,.13);
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* ============================= TEMA ESCURO ============================
+   Mesma lista de tokens do :root. Os fundos de estado deixam de ser
+   misturas claras com o acento e viram misturas escuras, com o texto do
+   enunciado sempre legível sobre eles. */
+
+:root[data-tema="escuro"] {
+  --roxo: #8f85ff;
+  --roxo-escuro: #a49cff;
+  --roxo-claro: #241f4d;
+  --verde: #34c77b;
+  --verde-fundo: #10291c;
+  --verde-borda: #34c77b;
+  --vermelho: #ff6b5f;
+  --vermelho-fundo: #2c1414;
+  --vermelho-borda: #ff6b5f;
+  --ambar: #e8ac3a;
+  --ambar-texto: #f0b95c;
+  --ambar-borda: #6b5326;
+
+  --fundo: #0f0f16;
+  --superficie: #17171f;
+  --superficie-alt: #1c1c26;
+  --borda: #2a2a37;
+  --borda-forte: #3b3b4b;
+  --texto: #ececf4;
+  --texto-suave: #a5a5b8;
+  --texto-tenue: #83838f;
+
+  --topo-fundo: rgba(23,23,31,.9);
+
+  --sobre-acento: #ffffff;
+
+  --hover-teste: #1c1a33;
+  --hover-estudo: #12261b;
+  --hover-rapido: #26200f;
+
+  --verde-forte: #2ea96c;
+  --vermelho-forte: #e05a4f;
+
+  --foco: rgba(143,133,255,.55);
+
+  --codigo-fundo: #0b0b12;
+  --codigo-texto: #dcdce8;
+
+  color-scheme: dark;
+
+  --sombra: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.35);
+  --sombra-alta: 0 8px 32px rgba(0,0,0,.55);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tela { min-height: 100%; }
+.tela[hidden] { display: none !important; }
+
+button { font-family: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ======================= ALTERNÂNCIA DE TEMA ======================= */
+
+/* Fica no canto superior direito, acima das três telas. O games evita que
+   ele cubra o "sair" do topo ou a barra de ação nas telas estreitas. */
+.btn-tema {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 40;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--borda-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--texto-suave);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+
+.btn-tema:hover { color: var(--texto); border-color: var(--texto-tenue); }
+
+.icone-tema {
+  grid-area: 1 / 1;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Cada ícone aparece no tema em que leva o usuário. */
+.icone-tema-lua { fill: currentColor; stroke: none; }
+.icone-tema-sol { display: none; }
+:root[data-tema="escuro"] .icone-tema-lua { display: none; }
+:root[data-tema="escuro"] .icone-tema-sol { display: block; }
+
+/* =========================== TELA INICIAL =========================== */
+
+.tela-inicio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+}
+
+.inicio-cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
+  width: 100%;
+  max-width: 560px;
+  padding: 34px 30px 26px;
+  text-align: center;
+}
+
+.marca {
+  display: inline-block;
+  background: var(--roxo-claro);
+  color: var(--roxo);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.inicio-cartao h1 {
+  font-size: 2.1rem;
+  letter-spacing: -.03em;
+  margin: 14px 0 2px;
+}
+
+.inicio-sub {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: .95rem;
+}
+
+.inicio-modos {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modo-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: var(--raio);
+  border: 1px solid var(--borda-forte);
+  background: var(--superficie);
+  cursor: pointer;
+  transition: border-color .16s, box-shadow .16s, transform .12s;
+}
+
+.modo-btn:hover { transform: translateY(-1px); box-shadow: var(--sombra); }
+.modo-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.modo-teste:hover:not(:disabled) { border-color: var(--roxo); background: var(--hover-teste); }
+.modo-estudo:hover:not(:disabled) { border-color: var(--verde); background: var(--hover-estudo); }
+.modo-rapido:hover:not(:disabled) { border-color: var(--ambar); background: var(--hover-rapido); }
+.modo-grande-desafio:hover:not(:disabled) { border-color: var(--roxo); background: var(--hover-teste); }
+
+.modo-nome { font-size: 1.06rem; font-weight: 700; }
+.modo-desc { font-size: .85rem; color: var(--texto-suave); }
+
+.modo-teste .modo-nome { color: var(--roxo); }
+.modo-estudo .modo-nome { color: var(--verde); }
+.modo-rapido .modo-nome { color: var(--ambar-texto); }
+.modo-grande-desafio .modo-nome { color: var(--roxo); }
+
+.modo-rapido {
+  border-style: dashed;
+  border-color: var(--ambar-borda);
+}
+
+.modo-rapido:hover:not(:disabled) { border-style: solid; }
+
+/* ============================== TOPO =============================== */
+
+.tela-jogo {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  /* O padding à direita reserva o canto para o botão de tema, fixo. */
+  padding: 12px 62px 12px 16px;
+  background: var(--topo-fundo);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borda);
+}
+
+.topo-sair {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--texto-suave);
+}
+
+.topo-sair:hover { background: var(--fundo); color: var(--texto); }
+.topo-sair svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; }
+
+.topo-progresso { min-width: 0; }
+
+.trilho {
+  height: 7px;
+  background: var(--borda);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.trilho-fill {
+  height: 100%;
+  width: 0;
+  background: var(--roxo);
+  border-radius: 999px;
+  transition: width .3s ease;
+}
+
+.topo-selo {
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================== CORPO ============================== */
+
+.corpo {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 22px 16px 26px;
+}
+
+.cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+  padding: 24px 26px 26px;
+}
+
+.cartao-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.etiqueta {
+  background: var(--roxo-claro);
+  color: var(--roxo);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.numero {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--texto-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+.enunciado { font-size: 1.06rem; line-height: 1.62; }
+
+.enunciado p { margin: 0 0 12px; }
+.enunciado p:last-child { margin-bottom: 0; }
+
+.enunciado code, .alternativa code, .afirmacao-texto code {
+  font-family: var(--mono);
+  font-size: .92em;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+.codigo {
+  font-family: var(--mono);
+  font-size: .82rem;
+  line-height: 1.55;
+  background: var(--codigo-fundo);
+  color: var(--codigo-texto);
+  padding: 15px 17px;
+  border-radius: var(--raio-p);
+  overflow-x: auto;
+  margin: 16px 0 0;
+}
+
+.codigo[hidden] { display: none; }
+
+/* Tabela de conteúdo do enunciado, apresentada por colunas. */
+.tabela-enunciado {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 0;
+  font-size: .92rem;
+  line-height: 1.5;
+}
+
+.tabela-enunciado th,
+.tabela-enunciado td {
+  border: 1px solid var(--borda);
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-enunciado th {
+  background: var(--superficie-alt);
+  font-weight: 600;
+}
+
+.tabela-enunciado:not(.tabela-por-linha) tbody tr:nth-child(even) { background: var(--superficie-alt); }
+
+/* Tabela apresentada por linhas: o rótulo identifica a linha, então ele
+   ocupa uma coluna estreita e o conteúdo fica com a largura restante. Sem
+   zebrado — cada linha é um par rótulo/conteúdo e a borda já separa. */
+.tabela-por-linha th[scope="row"] {
+  width: 1%;
+  white-space: nowrap;
+  font-weight: 600;
+  background: var(--superficie-alt);
+}
+
+@media (max-width: 640px) {
+  .tabela-enunciado { font-size: .84rem; }
+  .tabela-enunciado th,
+  .tabela-enunciado td { padding: 7px 9px; }
+  /* o rótulo pode ocupar a largura toda em tela estreita */
+  .tabela-por-linha th[scope="row"] { white-space: normal; }
+}
+
+/* ============================ RESPOSTAS ============================ */
+
+.respostas { margin-top: 22px; }
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 12px;
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* -- alternativa (múltipla escolha / drop-down) -- */
+
+.alternativa {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--superficie);
+  border: 1.5px solid var(--borda-forte);
+  border-radius: var(--raio-p);
+  cursor: pointer;
+  transition: border-color .14s, background .14s, box-shadow .14s;
+}
+
+.alternativa:last-child { margin-bottom: 0; }
+
+.alternativa:hover { border-color: var(--texto-tenue); background: var(--superficie-alt); }
+
+/* O input fica invisível mas cobre o cartão inteiro: continua clicável,
+   focável pelo teclado e legível por leitores de tela. */
+.alternativa { position: relative; }
+
+.alternativa input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.alternativa:has(input:focus-visible) {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.marca-num {
+  flex: none;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  border: 1.5px solid var(--borda-forte);
+  background: var(--fundo);
+  color: var(--texto-suave);
+  font-size: .82rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  transition: all .14s;
+}
+
+.alternativa-texto { flex: 1; padding-top: 2px; }
+
+.alternativa.multi .marca-num { border-radius: 7px; }
+
+.alternativa.selecionada {
+  border-color: var(--roxo);
+  background: var(--roxo-claro);
+  box-shadow: 0 0 0 1px var(--roxo) inset;
+}
+
+.alternativa.selecionada .marca-num {
+  background: var(--roxo);
+  border-color: var(--roxo);
+  color: var(--sobre-acento);
+}
+
+.alternativa.correta {
+  border-color: var(--verde-borda);
+  background: var(--verde-fundo);
+  box-shadow: 0 0 0 1px var(--verde-borda) inset;
+  opacity: 1;
+}
+
+.alternativa.correta .marca-num {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: var(--sobre-acento);
+}
+
+.alternativa.errada {
+  border-color: var(--vermelho-borda);
+  background: var(--vermelho-fundo);
+  box-shadow: 0 0 0 1px var(--vermelho-borda) inset;
+  opacity: 1;
+}
+
+.alternativa.errada .marca-num {
+  background: var(--vermelho);
+  border-color: var(--vermelho);
+  color: var(--sobre-acento);
+}
+
+.alternativa.revelada .marca-num::after {
+  content: "";
+}
+
+/* -- afirmação (hotspot) -- */
+
+.afirmacao {
+  padding: 15px 16px;
+  margin-bottom: 10px;
+  border: 1.5px solid var(--borda);
+  border-radius: var(--raio-p);
+  background: var(--fundo);
+}
+
+.afirmacao:last-child { margin-bottom: 0; }
+
+.afirmacao-texto { margin: 0 0 11px; font-size: .97rem; }
+
+.par-botoes { display: flex; gap: 8px; }
+
+.par-btn {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--borda-forte);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto-suave);
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .14s;
+}
+
+.par-btn { position: relative; }
+
+.par-btn input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.par-btn:has(input:focus-visible) {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+.par-btn:hover { border-color: var(--texto-tenue); }
+.par-btn.selecionado { border-color: var(--roxo); background: var(--roxo-claro); color: var(--roxo); }
+
+.par-btn.correto {
+  border-color: var(--verde-borda);
+  background: var(--verde);
+  color: var(--sobre-acento);
+}
+
+.par-btn.errado {
+  border-color: var(--vermelho-borda);
+  background: var(--vermelho);
+  color: var(--sobre-acento);
+}
+
+.afirmacao.bloqueada .par-btn { cursor: default; }
+
+/* -- associação (arrastar-e-soltar) -- */
+
+.assoc {
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-p);
+  background: var(--fundo);
+}
+
+.assoc:last-child { margin-bottom: 0; }
+
+.assoc-destino { margin: 0 0 9px; font-size: .96rem; }
+
+.assoc select {
+  width: 100%;
+  font-family: inherit;
+  font-size: .95rem;
+  padding: 10px 12px;
+  border: 1.5px solid var(--borda-forte);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+/* A lista de opções é desenhada pelo sistema; sem color-scheme ela
+   ficaria clara por cima de um tema escuro. */
+.assoc select option {
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.assoc select.correto {
+  border-color: var(--verde-borda);
+  background: var(--verde-fundo);
+  color: var(--verde);
+  font-weight: 600;
+}
+
+.assoc select.errado {
+  border-color: var(--vermelho-borda);
+  background: var(--vermelho-fundo);
+  color: var(--vermelho);
+}
+
+.assoc select:disabled { cursor: default; opacity: 1; }
+
+/* ==================== ANÚNCIO PARA LEITORES DE TELA ================== */
+
+/* Visualmente ausente, mas lido por leitores de tela. Precisa estar no
+   fluxo do documento (não display:none) para que o aria-live funcione. */
+.som-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================ BARRA DE AÇÃO ========================= */
+
+.acoes,
+.fim-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barra-acao {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--topo-fundo);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--borda);
+}
+
+.btn-acao {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: var(--raio-p);
+  background: var(--roxo);
+  color: var(--sobre-acento);
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+}
+
+.btn-acao:hover:not(:disabled) { background: var(--roxo-escuro); }
+.btn-acao:disabled { opacity: .38; cursor: not-allowed; }
+.btn-acao[hidden] { display: none; }
+
+.btn-avancar { background: var(--verde); }
+.btn-avancar:hover:not(:disabled) { background: var(--verde-forte); }
+
+.btn-texto {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  background: none;
+  border: 0;
+  color: var(--texto-suave);
+  font-size: .93rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-texto:hover { color: var(--texto); }
+
+/* ========================== TELA DE RESULTADO ====================== */
+
+.tela-fim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 18px;
+}
+
+.fim-cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
+  width: 100%;
+  max-width: 540px;
+  padding: 32px 28px 26px;
+  text-align: center;
+}
+
+/* ============================== DONUT ============================== */
+
+.donut {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  margin: 0 auto 18px;
+}
+
+.donut svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut circle {
+  fill: none;
+  stroke-width: 13;
+}
+
+.donut-fundo { stroke: var(--borda); }
+
+.donut-acerto,
+.donut-erro {
+  stroke-linecap: butt;
+  transition: stroke-dasharray .8s ease, stroke-dashoffset .8s ease;
+}
+
+.donut-acerto { stroke: var(--verde); }
+.donut-erro { stroke: var(--vermelho); }
+
+.donut-centro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.donut-centro strong {
+  font-size: 2.6rem;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-centro span {
+  font-size: .8rem;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* ============================= LEGENDA ============================= */
+
+.legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 24px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-p);
+  overflow: hidden;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: var(--superficie);
+}
+
+.legenda-item + .legenda-item { border-top: 1px solid var(--borda); }
+
+.legenda-ponto {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.legenda-ponto-acerto { background: var(--verde); }
+.legenda-ponto-erro { background: var(--vermelho); }
+.legenda-ponto-total { background: var(--borda-forte); }
+
+.legenda-rotulo { flex: 1; font-size: .93rem; color: var(--texto-suave); }
+
+.legenda-valor {
+  font-size: 1.18rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.legenda-pct {
+  min-width: 60px;
+  text-align: right;
+  font-size: .88rem;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-revisar { background: var(--vermelho); }
+
+.btn-revisar:hover:not(:disabled) { background: var(--vermelho-forte); }
+/* ============================= RESPONSIVO =========================== */
+
+@media (max-width: 620px) {
+  .inicio-cartao { padding: 28px 20px 22px; border-radius: 18px; }
+  .inicio-cartao h1 { font-size: 1.75rem; }
+  .corpo { padding: 16px 12px 20px; }
+  .cartao { padding: 18px 16px 20px; border-radius: 15px; }
+  .enunciado { font-size: 1rem; }
+  .alternativa { padding: 13px 14px; gap: 11px; }
+  .marca-num { width: 25px; height: 25px; font-size: .78rem; }
+  .donut { width: 168px; height: 168px; }
+  .donut-centro strong { font-size: 2.2rem; }
+}
+
+@media (max-width: 380px) {
+  .par-botoes { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
