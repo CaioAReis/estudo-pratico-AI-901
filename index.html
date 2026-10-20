@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Simulado do exame Microsoft AI-901 com modos teste, estudo, estudo rápido e grande desafio.">
+<title>AI-901 · Simulado</title>
+<script>
+  /* Aplica o tema salvo antes da primeira renderização, evitando o flash do
+     tema errado. Se o armazenamento local estiver indisponível, o tema
+     claro segue como padrão. */
+  (function () {
+    try {
+      var t = localStorage.getItem("ai901:tema");
+      if (t === "escuro" || t === "claro") document.documentElement.setAttribute("data-tema", t);
+    } catch (e) { /* modo privado ou storage bloqueado */ }
+  })();
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===================== ALTERNÂNCIA DE TEMA ===================== -->
+
+<button class="btn-tema" id="btn-tema" type="button" aria-pressed="false">
+  <svg class="icone-tema icone-tema-lua" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>
+  </svg>
+  <svg class="icone-tema icone-tema-sol" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.4"/>
+    <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/>
+  </svg>
+  <span class="som-leitor" id="btn-tema-rotulo">Ativar tema escuro</span>
+</button>
+
+<!-- ===================== TELA INICIAL ===================== -->
+<section id="tela-inicio" class="tela tela-inicio">
+  <div class="inicio-cartao">
+    <span class="marca">AI-901</span>
+    <h1>Simulado</h1>
+    <p class="inicio-sub">Microsoft Certified: AI Engineer Associate</p>
+
+    <div class="inicio-modos">
+      <button class="modo-btn modo-teste" id="btn-modo-teste">
+        <span class="modo-nome">Modo teste</span>
+        <span class="modo-desc">40 questões, com pontuação e resultado ao final</span>
+      </button>
+      <button class="modo-btn modo-estudo" id="btn-modo-estudo">
+        <span class="modo-nome">Modo estudo</span>
+        <span class="modo-desc">40 questões, revela a resposta sem pontuar</span>
+      </button>
+      <button class="modo-btn modo-rapido" id="btn-modo-rapido">
+        <span class="modo-nome">Estudo rápido</span>
+        <span class="modo-desc">20 questões para uma revisão rápida</span>
+      </button>
+      <button class="modo-btn modo-grande-desafio" id="btn-modo-grande-desafio">
+        <span class="modo-nome">Grande desafio</span>
+        <span class="modo-desc" id="btn-modo-grande-desafio-desc"></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TELA DO JOGO ===================== -->
+<section id="tela-jogo" class="tela tela-jogo" hidden>
+  <header class="topo">
+    <button class="topo-sair" id="btn-sair" aria-label="Sair da rodada" title="Sair">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="topo-progresso">
+      <div class="trilho"><div class="trilho-fill" id="trilho-fill"></div></div>
+    </div>
+    <div class="topo-selo" id="topo-selo"><span id="topo-texto">1 de 40</span></div>
+  </header>
+
+  <div class="corpo">
+    <article class="cartao" id="cartao">
+      <div class="cartao-cabecalho">
+        <span class="etiqueta" id="etiqueta-tipo">Múltipla escolha</span>
+        <span class="numero" id="numero-questao">Questão 1</span>
+      </div>
+
+      <div class="enunciado" id="enunciado"></div>
+      <pre class="codigo" id="codigo" hidden></pre>
+
+      <div class="respostas" id="respostas"></div>
+    </article>
+
+    <!--
+      O acerto e o erro são comunicados apenas pelas marcações visuais nas
+      alternativas. Esta região fica escondida de propósito: leitores de tela
+      não percebem cor, então o resultado é anunciado por ela via aria-live.
+    -->
+    <div id="anuncio" class="som-leitor" role="status" aria-live="polite"></div>
+  </div>
+
+  <footer class="barra-acao">
+    <button class="btn-acao btn-verificar" id="btn-verificar" disabled>Verificar</button>
+    <button class="btn-acao btn-avancar" id="btn-avancar" hidden>Próxima</button>
+  </footer>
+</section>
+
+<!-- ===================== TELA DE RESULTADO ===================== -->
+<section id="tela-fim" class="tela tela-fim" hidden>
+  <div class="fim-cartao">
+    <div class="donut" id="donut" role="img" aria-labelledby="donut-desc">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="donut-fundo" cx="60" cy="60" r="52"></circle>
+        <circle class="donut-acerto" id="donut-acerto" cx="60" cy="60" r="52"></circle>
+        <circle class="donut-erro" id="donut-erro" cx="60" cy="60" r="52"></circle>
+      </svg>
+      <div class="donut-centro">
+        <strong id="donut-pct">0%</strong>
+        <span>acerto</span>
+      </div>
+    </div>
+    <p id="donut-desc" class="som-leitor"></p>
+
+    <h1 id="fim-titulo">Rodada concluída</h1>
+    <p class="fim-sub" id="fim-sub"></p>
+
+    <div class="legenda" id="legenda">
+      <div class="legenda-item">
+        <span class="legenda-ponto legenda-ponto-acerto" aria-hidden="true"></span>
+        <span class="legenda-rotulo">Acertos</span>
+        <strong class="legenda-valor" id="legenda-acerto">0</strong>
+        <span class="legenda-pct" id="legenda-acerto-pct">0%</span>
+      </div>
+      <div class="legenda-item">
+        <span class="legenda-ponto legenda-ponto-erro" aria-hidden="true"></span>
+        <span class="legenda-rotulo">Erros</span>
+        <strong class="legenda-valor" id="legenda-erro">0</strong>
+        <span class="legenda-pct" id="legenda-erro-pct">0%</span>
+      </div>
+      <div class="legenda-item">
+        <span class="legenda-ponto legenda-ponto-total" aria-hidden="true"></span>
+        <span class="legenda-rotulo">Respondidas</span>
+        <strong class="legenda-valor" id="legenda-total">0</strong>
+        <span class="legenda-pct"></span>
+      </div>
+    </div>
+
+    <div class="fim-acoes">
+      <button class="btn-acao btn-revisar" id="btn-revisar-erros" hidden>Revisar só os erros</button>
+      <button class="btn-acao btn-verificar" id="btn-reiniciar">Jogar novamente</button>
+      <button class="btn-texto" id="btn-voltar">Trocar de modo</button>
+    </div>
+  </div>
+</section>
+
+<script src="dados.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
